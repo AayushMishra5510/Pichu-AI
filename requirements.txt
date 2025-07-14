@@ -8,12 +8,10 @@ numpy
 opencv-python
 gunicorn
 wikipedia
-warnings 
 scikit-learn
 google.generativeai
 requests
 webbrowser
-os
 cv2
 PIL
 ctypes
