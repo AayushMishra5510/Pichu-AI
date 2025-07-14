@@ -8,4 +8,14 @@ numpy
 opencv-python
 gunicorn
 wikipedia
-
+random
+warnings 
+scikit-learn
+google.generativeai
+requests
+webbrowser
+os
+cv2
+PIL
+ctypes
+comtypes
