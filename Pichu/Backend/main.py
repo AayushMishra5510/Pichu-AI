@@ -6,7 +6,7 @@ import pyttsx3
 import webbrowser
 from .Model import PichuModel
 from .Automation import PichuAI, play_music, play_specific_song, list_songs, search_google, search_wiki, search_youtube, search_chatgpt
-import os_utils
+import .os_utils
 
 # --- TTS Setup ---
 
