@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, url_for
-from .main import handle_query
+from main import handle_query
 from image import analyze_image_text_and_faces
 import os
 
