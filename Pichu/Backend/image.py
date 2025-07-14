@@ -2,7 +2,7 @@ import cv2
 import pytesseract
 from tkinter import Tk, filedialog
 from PIL import Image
-from main import speak
+from .main import speak
 
 def select_image_via_dialog():
     root = Tk()
