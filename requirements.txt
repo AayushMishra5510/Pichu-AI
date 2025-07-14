@@ -6,3 +6,4 @@ pyttsx3
 SpeechRecognition
 numpy
 opencv-python
+gunicorn
