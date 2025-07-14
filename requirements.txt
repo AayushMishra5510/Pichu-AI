@@ -6,8 +6,3 @@ pyttsx3
 SpeechRecognition
 numpy
 opencv-python
-requests
-sys
-webbrowser
-datetime
-speech_recognition
