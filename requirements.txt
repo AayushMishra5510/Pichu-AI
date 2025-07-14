@@ -11,8 +11,3 @@ wikipedia
 scikit-learn
 google.generativeai
 requests
-
-cv2
-PIL
-ctypes
-comtypes
