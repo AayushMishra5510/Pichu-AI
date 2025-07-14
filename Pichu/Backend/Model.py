@@ -6,7 +6,7 @@ import random
 import warnings
 warnings.simplefilter('ignore')
 
-from Automation import PichuAI
+from .Automation import PichuAI
 
 class PichuModel:
     def __init__(self, api_key: str):
