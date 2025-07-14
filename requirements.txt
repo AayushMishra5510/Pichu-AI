@@ -8,4 +8,4 @@ numpy
 opencv-python
 gunicorn
 wikipedia
-pyaudio
+
