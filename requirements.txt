@@ -7,7 +7,6 @@ SpeechRecognition
 numpy
 opencv-python
 requests
-os
 sys
 webbrowser
 datetime
