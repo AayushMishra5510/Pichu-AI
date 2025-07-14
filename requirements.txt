@@ -11,7 +11,7 @@ wikipedia
 scikit-learn
 google.generativeai
 requests
-webbrowser
+
 cv2
 PIL
 ctypes
