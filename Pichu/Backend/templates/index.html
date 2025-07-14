@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pichu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js (future use) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+body { font-family: 'Inter', sans-serif; }
+.fade-in { animation: fadeInUp 0.7s cubic-bezier(0.4,0,0.2,1) both; }
+.slide-in { animation: slideInLeft 0.7s cubic-bezier(0.4,0,0.2,1) both; }
+.blur-in { animation: blurIn 0.6s cubic-bezier(0.4,0,0.2,1) both; }
+@keyframes fadeInUp {
+from { opacity: 0; transform: translateY(40px);}
+to { opacity: 1; transform: none;}
+}
+@keyframes slideInLeft {
+from { opacity: 0; transform: translateX(-40px);}
+to { opacity: 1; transform: none;}
+}
+@keyframes blurIn {
+from { opacity: 0; filter: blur(8px);}
+to { opacity: 1; filter: blur(0);}
+}
+.voice-pulse {
+width: 20px; height: 20px; background: "orange-600";
+border-radius: 100%; position: relative; box-shadow: 0 0 0 0 #23272e;
+animation: pulse 1.2s infinite cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes pulse {
+0% { box-shadow: 0 0 0 0 #a3e63533; }
+70% { box-shadow: 0 0 0 8px #a3e63511;}
+100% { box-shadow: 0 0 0 0 #a3e63500;}
+}
+.custom-scroll::-webkit-scrollbar { width: 8px; }
+.custom-scroll::-webkit-scrollbar-thumb { background: #23272e; border-radius: 6px; }
+.custom-scroll { scrollbar-width: thin; scrollbar-color: #23272e #18181b; }
+@keyframes vizBarAnim {
+  0% { height: 20px; }
+  100% { height: 60px; }
+}
+
+/* Animation for center-to-side and zoom */
+.animate-center {
+  left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1.2);
+  position: fixed; z-index: 30; transition: all 1s cubic-bezier(.4,2,.2,1);
+}
+.animate-left {
+  left: 0; top: 0; transform: translate(0, 0) scale(1);
+  position: fixed; width: 50vw; height: 100vh; z-index: 20; transition: all 1s cubic-bezier(.4,2,.2,1);
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+}
+.animate-right {
+  right: 0; top: 0; transform: translate(0, 0) scale(1);
+  position: fixed; width: 50vw; height: 100vh; z-index: 10; transition: all 1s cubic-bezier(.4,2,.2,1);
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+}
+@media (max-width: 900px) {
+  .animate-left, .animate-right { width: 100vw; }
+}
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-zinc-50 text-zinc-900 overflow-hidden">
+
+    <!-- Chat/Voice UI (starts centered, then animates left) -->
+    <div id="chatPanel" class="animate-center">
+      <div class="flex flex-col items-center justify-center w-full max-w-xl mx-auto">
+        <!-- Header -->
+        <div class="fade-in w-full max-w-2xl flex flex-row gap-3 mb-8 items-center">
+          <div class="rounded-full bg-gradient-to-tr from-yellow-500 w-12 h-12 flex items-center justify-center shadow-lg border to-amber-600 border-orange-200">
+            <img src="{{ url_for('static', filename='pichu.png') }}" alt="Pichu Logo" class="rounded-full w-12 h-12 object-contain" />
+          </div>
+          <div>
+               <h1 class="text-[2rem] leading-tight font-semibold text-black tracking-tight mb-0">Pichu</h1>                
+                <p class="text-base font-normal mt-0 text-orange-600">Your smart, voice-powered OS companion</p>
+          </div>
+          <div class="flex-1"></div>
+        </div>
+        <!-- Main Card -->
+        <div class="slide-in w-full flex flex-col min-h-[600px] border rounded-2xl shadow-xl bg-orange-100/25 border-orange-200">
+          <!-- Chat History -->
+          <div id="chat" class="custom-scroll flex-1 overflow-y-auto pt-6 pr-6 pb-6 pl-6 space-y-5"></div>
+          <!-- Divider -->
+          <div class="h-[1.5px] bg-gradient-to-r from-orange-200 via-orange-300/50 to-orange-200"></div>
+          <!-- Input/Controls -->
+          <div class="px-4 py-4 flex flex-col gap-2">
+            <div class="w-full flex flex-row items-center gap-3">
+              <!-- Voice Status -->
+              <button id="voiceBtn" class="relative group mr-1" aria-label="Voice Command">
+                <div class="voice-pulse"></div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="mic" class="lucide lucide-mic absolute left-0 top-0 w-4 h-4 group-hover:text-amber-400 text-orange-800"></svg>
+              </button>
+              <!-- Text Input -->
+              <input id="chatInput" type="text" autocomplete="off" placeholder="Type or say your command..." class="flex-1 px-4 py-2 rounded-lg border placeholder:text-orange-500 font-normal text-base focus:outline-none focus:border-amber-500 transition bg-orange-200 border-orange-300 text-orange-900">
+                  </style>
+              <!-- Send -->
+              <button id="sendBtn" class="ml-1 p-2 rounded-lg transition flex items-center justify-center group bg-amber-400 hover:bg-amber-300" aria-label="Send">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-up-right" class="lucide lucide-arrow-up-right w-5 h-5 group-hover:scale-110 transition text-black"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></svg>
+              </button>
+              <!-- Clear Chat -->
+              <button id="clearBtn" class="ml-2 p-2 rounded-lg bg-red-400 hover:bg-red-500 text-white font-semibold transition" aria-label="Clear Chat">
+                Clear Chat
+              </button>
+            </div>
+            <!-- Voice status, file name, errors etc. -->
+            <div class="flex flex-row items-center gap-4 mt-1 min-h-[24px]">
+              <span id="voiceStatus" class="text-sm font-medium opacity-0 transition text-orange-600">Listening...</span>
+              <span id="fileStatus" class="text-sm font-medium text-amber-600"></span>
+              <span id="errorStatus" class="text-sm font-medium text-green-600"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3D Robot Asset (starts centered, then animates right and fills right half) -->
+    <div id="robotPanel" class="animate-center">
+      <iframe src="https://my.spline.design/nexbotrobotcharacterconcept-kLwr8f6hgKgaa5gmU6oB00Si"
+        frameborder="0" width="100%" height="100%" style="min-width:320px; min-height:320px; max-width:100vw; max-height:100vh;"></iframe>
+    </div>
+
+    <!-- Voice Visualization Overlay -->
+    <div id="voiceViz" class="fixed inset-0 flex items-center justify-center bg-orange-100/80 z-50" style="display:none;">
+      <div class="flex flex-col items-center">
+        <div class="flex gap-2 mb-4">
+          <div class="viz-bar bg-amber-400 rounded" style="width:10px; height:40px; animation: vizBarAnim 1s infinite alternate;"></div>
+          <div class="viz-bar bg-amber-500 rounded" style="width:10px; height:30px; animation: vizBarAnim 1.2s infinite alternate;"></div>
+          <div class="viz-bar bg-amber-400 rounded" style="width:10px; height:50px; animation: vizBarAnim 0.9s infinite alternate;"></div>
+          <div class="viz-bar bg-amber-500 rounded" style="width:10px; height:35px; animation: vizBarAnim 1.1s infinite alternate;"></div>
+          <div class="viz-bar bg-amber-400 rounded" style="width:10px; height:45px; animation: vizBarAnim 1.3s infinite alternate;"></div>
+        </div>
+        <div class="text-2xl font-bold text-orange-700 mb-2">Listening...</div>
+        <div class="text-orange-500">Say your command</div>
+      </div>
+    </div>
+
+    <!-- Transparent overlay for ClickSpark on right side -->
+    <div id="rightClickOverlay"
+         style="position:-webkit-sticky; right:0; top:0; width:50vw; height:100vh; z-index:22; background:transparent;">
+    </div>
+    <script>
+      const sparkAudioUrl = "{{ url_for('static', filename='audio/spark.mp3') }}";
+      </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- Scripts -->
+    <script>
+      // Animate robot panel first, then chat panel after a delay
+      window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          document.getElementById('robotPanel').classList.remove('animate-center');
+          document.getElementById('robotPanel').classList.add('animate-right');
+        }, 100); 
+
+        setTimeout(() => {
+          document.getElementById('chatPanel').classList.remove('animate-center');
+          document.getElementById('chatPanel').classList.add('animate-left');
+        }, 100); 
+      });
+
+      lucide.createIcons();
+
+      // --- Chat UI ---
+      const chat = document.getElementById('chat');
+      const input = document.getElementById('chatInput');
+      const sendBtn = document.getElementById('sendBtn');
+      const voiceBtn = document.getElementById('voiceBtn');
+      const clearBtn = document.getElementById('clearBtn');
+      const voiceStatus = document.getElementById('voiceStatus');
+      const imageInput = document.getElementById('imageInput');
+      const fileStatus = document.getElementById('fileStatus');
+      const errorStatus = document.getElementById('errorStatus');
+      const voiceViz = document.getElementById('voiceViz');
+
+      function addMsg(message, sender="user", isImage=false) {
+        const el = document.createElement('div');
+        el.className = `${sender === "user" ? "slide-in" : "fade-in"}`;
+        el.style.animationDelay = sender === "user" ? ".05s" : ".12s";
+        el.innerHTML = `
+          <div class="flex items-center gap-2">
+            <div class="rounded-full ${sender==="user" ? "bg-zinc-700":"bg-amber-400"} w-8 h-8 flex items-center justify-center">
+              ${sender==="user"
+                ? `<i data-lucide="user" class="w-5 h-5 text-zinc-200"></i>`
+                : `<img src="{{ url_for('static', filename='pichu.png') }}" class="w-8 h-8 object-contain" alt="Pichu AI Logo" />`
+              }
+            </div>
+            <span class="font-semibold text-orange-800">${sender==="user"?"You":"Pichu"}</span>
+            <span class="text-xs text-orange-500">${sender==="user"?"":"AI"}</span>
+          </div>
+          <div class="ml-10 mt-0.5 text-orange-800 font-normal text-base leading-relaxed">
+            ${message}
+          </div>
+        `;
+        chat.appendChild(el);
+        lucide.createIcons();
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      // --- Backend Integration ---
+      async function sendMessage(msg, isImage=false) {
+        if (!msg.trim()) return;
+        addMsg(msg, "user", isImage);
+        addMsg("...", "ai");
+        let response = "";
+        if (isImage) {
+          // Image OCR
+          const file = imageInput?.files?.[0];
+          const formData = new FormData();
+          formData.append('image', file);
+          try {
+            const res = await fetch('/upload', {
+              method: 'POST',
+              body: formData
+            });
+            const data = await res.json();
+            response = data.response;
+          } catch {
+            response = "Image upload failed.";
+          }
+        } else {
+          // Text/voice
+          try {
+            const res = await fetch('/ask', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({message: msg})
+            });
+            const data = await res.json();
+            response = data.response;
+          } catch {
+            response = "Error connecting to backend.";
+          }
+        }
+        // Remove loading dots
+        const last = chat.querySelectorAll('.fade-in, .slide-in');
+        if (last.length) last[last.length-1].remove();
+        addMsg(response, "ai", isImage);
+        speak(response);
+      }
+
+      sendBtn.addEventListener('click', ()=>{
+        if (input.value.trim()) {
+          sendMessage(input.value);
+          input.value = "";
+        }
+      });
+
+      input.addEventListener('keydown', e=>{
+        if (e.key === "Enter") {
+          sendBtn.click();
+        }
+      });
+
+      // --- Voice Recognition UI ---
+      let listening = false;
+      let recognition;
+      if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.lang = 'en-IN';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.onstart = function() {
+          listening = true;
+          voiceStatus.textContent = "Listening...";
+          voiceStatus.classList.remove("opacity-0");
+          // Hide chat, show viz
+          document.querySelector('.slide-in.w-full').style.display = 'none';
+          voiceViz.style.display = 'flex';
+        };
+        recognition.onend = function() {
+          listening = false;
+          voiceStatus.textContent = "";
+          voiceStatus.classList.add("opacity-0");
+          // Show chat, hide viz
+          document.querySelector('.slide-in.w-full').style.display = '';
+          voiceViz.style.display = 'none';
+        };
+        recognition.onerror = function(e) {
+          voiceStatus.textContent = "Error: " + e.error;
+        };
+        recognition.onresult = function(e) {
+          let transcript = e.results[0][0].transcript;
+          input.value = transcript;
+          voiceStatus.textContent = "Heard: " + transcript;
+          setTimeout(()=>voiceStatus.classList.add("opacity-0"), 1200);
+          setTimeout(()=>sendBtn.click(), 700);
+        };
+      }
+
+      voiceBtn.addEventListener('click', ()=>{
+        if (!recognition) {
+          voiceStatus.textContent = "Voice not supported.";
+          voiceStatus.classList.remove("opacity-0");
+          setTimeout(()=>voiceStatus.classList.add("opacity-0"), 1700);
+          return;
+        }
+        if (!listening) recognition.start();
+        else recognition.stop();
+      });
+
+      // --- File Upload for OCR ---
+      if (imageInput) {
+        imageInput.addEventListener('change', e=>{
+          fileStatus.textContent = "";
+          errorStatus.textContent = "";
+          const file = imageInput.files[0];
+          if (!file) return;
+          if (!file.type.startsWith('image/')) {
+            errorStatus.textContent = "Please select an image file.";
+            return;
+          }
+          fileStatus.textContent = "Uploading: " + file.name;
+          setTimeout(()=>{
+            fileStatus.textContent = "";
+            sendMessage("Extract text from image: " + file.name, true);
+          }, 1200);
+        });
+      }
+
+      // Clear chat history
+      clearBtn.addEventListener('click', ()=>{
+        chat.innerHTML = "";
+        input.value = "";
+        fileStatus.textContent = "";
+        errorStatus.textContent = "";
+      });
+
+      // Autofocus input
+      setTimeout(()=>input.focus(), 700);
+
+      function speak(text) {
+        if ('speechSynthesis' in window) {
+          const synth = window.speechSynthesis;
+          let voices = synth.getVoices();
+          // Try to find a female Indian English voice
+          let selectedVoice = voices.find(v =>
+            v.lang.toLowerCase().includes('en-in') &&
+            v.name.toLowerCase().includes('female')
+          );
+          // Fallback: any Indian English voice
+          if (!selectedVoice) {
+            selectedVoice = voices.find(v => v.lang.toLowerCase().includes('en-in'));
+          }
+          // Fallback: any English voice
+          if (!selectedVoice) {
+            selectedVoice = voices.find(v => v.lang.toLowerCase().includes('en'));
+          }
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = selectedVoice ? selectedVoice.lang : 'en-IN';
+          if (selectedVoice) utterance.voice = selectedVoice;
+          utterance.rate = 1;
+          synth.speak(utterance);
+        }
+      }
+    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
