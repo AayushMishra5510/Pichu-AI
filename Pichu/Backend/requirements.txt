@@ -1,0 +1,14 @@
+Flask
+opencv-python
+pytesseract
+Pillow
+pyttsx3
+SpeechRecognition
+numpy
+opencv-python
+requests
+os
+sys
+webbrowser
+datetime
+speech_recognition
